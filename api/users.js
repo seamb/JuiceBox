@@ -2,15 +2,20 @@ const express = require('express');
 const usersRouter = express.Router();
 const getUserByUsername = express.Router();
 
-usersRouter.use((req, res, next) => {
-  console.log("A request is being made to /users");
+// usersRouter.use((req, res, next) => {
+//   console.log("A request is being made to /users");
 
-  next(); // THIS IS DIFFERENT
+//   next(); // THIS IS DIFFERENT
+// });
+
+// const { getAllUsers } = require('../db');
+
+// // UPDATE
+usersRouter.post('/login', async (req, res, next) => {
+  console.log(req.body);
+  res.end();
 });
 
-const { getAllUsers } = require('../db');
-
-// UPDATE
 usersRouter.get('/', async (req, res) => {
   const users = await getAllUsers();
 
@@ -19,10 +24,9 @@ usersRouter.get('/', async (req, res) => {
   });
 });
 
-usersRouter.post('/login', async (req, res, next) => {
-  console.log(req.body);
-  res.end();
-});
+const { SECRET = 'server secret'} = process.env;
+console.log('**PROCESS DOT ENV**', process.env.JWT_SECRET);
+
 
 usersRouter.post('/login', async (req, res, next) => {
   const { username, password } = req.body;
@@ -47,20 +51,22 @@ usersRouter.post('/login', async (req, res, next) => {
         message: 'Username or password is incorrect'
       });
     }
-    console.log(getUserbyUsername,"get user name" );
-
-  const jwt = require('jsonwebtoken');
-
-  const token = jwt.sign({ id: 3, username: 'joshua' }, 'server secret');
-
-  const recoveredData = jwt.verify(token, 'server secret');
-
   } catch(error) {
     console.log(error);
     next(error);
   }
-
-
 });
+
+const jwt = require('jsonwebtoken');
+
+const token = jwt.sign({ id: 3, username: 'joshua' }, SECRET, { expiresIn: '1h' });
+
+
+console.log(token, "token");
+const recoveredData = jwt.verify(token, SECRET);
+
+const decripted = jwt.verify(token, SECRET);
+
+console.log('decrpted', decripted);
 
 module.exports = usersRouter;
